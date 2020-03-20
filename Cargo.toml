@@ -6,7 +6,7 @@ edition = "2018"
 description = "A plugin for c-lightning that manages pruning of bitcoind such that it can always sync."
 license = "MIT"
 repository = "https://github.com/Start9Labs/c-lightning-pruning-plugin"
-documentation = "http://docs.rs/c-lightning-pruning-plugin"
+documentation = "https://docs.rs/c-lightning-pruning-plugin"
 readme = "README.md"
 
 [dependencies]
