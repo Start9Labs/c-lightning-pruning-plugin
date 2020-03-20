@@ -52,8 +52,8 @@ pub fn handle_getmanifest() -> Result<Value, RpcError> {
     }))
 }
 
-pub fn handle_event(method: &str, params: &RpcParams) -> Result<(), String> {
-    unimplemented!()
+pub fn handle_event(_method: &str, _params: &RpcParams) -> Result<(), String> {
+    Ok(())
 }
 
 pub fn handle_req(sender: &Sender<InitInfo>, req: &RpcReq) -> Result<Option<Value>, RpcError> {

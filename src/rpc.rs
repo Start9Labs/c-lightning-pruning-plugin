@@ -83,6 +83,11 @@ pub enum RpcResult {
     Result(Value),
     Error(RpcError),
 }
+impl RpcResult {
+    pub fn res(self) -> Result<Value, RpcError> {
+        self.into()
+    }
+}
 impl From<RpcResult> for Result<Value, RpcError> {
     fn from(r: RpcResult) -> Self {
         match r {
@@ -151,6 +156,7 @@ impl std::fmt::Display for RpcError {
         Ok(())
     }
 }
+impl std::error::Error for RpcError {}
 
 pub async fn make_socket_req(
     socket: &mut tokio::net::UnixStream,
