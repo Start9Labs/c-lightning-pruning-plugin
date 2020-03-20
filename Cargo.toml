@@ -1,6 +1,6 @@
 [package]
 name = "c-lightning-pruning-plugin"
-version = "0.3.0"
+version = "0.1.0"
 authors = ["Aiden McClelland <me@drbonez.dev>"]
 edition = "2018"
 description = "A plugin for c-lightning that manages pruning of bitcoind such that it can always sync."
