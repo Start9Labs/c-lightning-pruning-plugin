@@ -1,10 +1,13 @@
 [package]
 name = "c-lightning-pruning-plugin"
-version = "0.1.0"
+version = "0.3.0"
 authors = ["Aiden McClelland <me@drbonez.dev>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "A plugin for c-lightning that manages pruning of bitcoind such that it can always sync."
+license = "MIT"
+repository = "https://github.com/Start9Labs/c-lightning-pruning-plugin"
+documentation = "http://docs.rs/c-lightning-pruning-plugin"
+readme = "README.md"
 
 [dependencies]
 crossbeam-channel = "0.4.2"
