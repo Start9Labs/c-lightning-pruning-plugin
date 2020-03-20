@@ -29,17 +29,26 @@ pub async fn prune(
     .result
     .res()?;
     let res: LightningInfo = serde_json::from_value(res)?;
-    bitcoin_req
+    if res.blockheight < rescan + 1 {
+        return Ok(());
+    }
+    let prune_height = res.blockheight - rescan - 1;
+    log::info!("pruning bitcoin to {}", prune_height);
+    let res = bitcoin_req
         .try_clone()
         .ok_or_else(|| failure::format_err!("cannot clone request"))?
         .json(&RpcReq {
             id: Some(JsonRpcV2Id::Num(0.into())),
             jsonrpc: Default::default(),
             method: Cow::Borrowed("pruneblockchain"),
-            params: RpcParams::ByPosition(vec![Value::Number((res.blockheight - rescan).into())]),
+            params: RpcParams::ByPosition(vec![Value::Number(prune_height.into())]),
         })
         .send()
         .await?;
+    match res.error_for_status_ref() {
+        Ok(_) => (),
+        Err(e) => return Err(failure::format_err!("{}: {:?}", e, res.text().await)),
+    }
 
     Ok(())
 }

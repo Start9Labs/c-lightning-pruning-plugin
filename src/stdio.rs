@@ -36,7 +36,7 @@ pub fn handle_getmanifest() -> Result<Value, RpcError> {
             {
                 "name": "pruning-interval",
                 "type": "int",
-                "default": 60,
+                "default": 600,
                 "description": "number of seconds to wait between pruning checks"
             }
         ],
@@ -153,7 +153,7 @@ impl From<LightningInit> for InitInfo {
 }
 
 fn default_pruning_interval() -> u64 {
-    60
+    600
 }
 
 #[derive(Clone, Debug, serde::Deserialize)]

@@ -67,9 +67,14 @@ async fn main() -> Result<(), Error> {
         client
     };
     let client = client.build()?;
-    let mut bitcoin_url = bitcoin_info.bitcoin_rpcconnect;
+    let mut bitcoin_url = reqwest::Url::parse("http://localhost")?;
+    bitcoin_url.set_host(Some(&format!("{}", bitcoin_info.bitcoin_rpcconnect)))?;
     bitcoin_url
-        .set_port(Some(bitcoin_info.bitcoin_rpcport))
+        .set_port(Some(
+            bitcoin_info
+                .bitcoin_rpcport
+                .unwrap_or(config_info.network.default_port()),
+        ))
         .map_err(|_| failure::format_err!("unable to set port"))?;
     let bitcoin_req = client.post(bitcoin_url).basic_auth(
         bitcoin_info.bitcoin_rpcuser,

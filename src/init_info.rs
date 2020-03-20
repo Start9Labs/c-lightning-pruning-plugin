@@ -1,36 +1,18 @@
-use std::fmt::Display;
 use std::net::SocketAddr;
 use std::path::PathBuf;
-use std::str::FromStr;
 use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
-use reqwest::Url;
 use serde_json::Value;
 use tokio::sync::RwLock;
-
-#[derive(Clone, Debug)]
-pub struct StringLike<SL>(pub SL);
-impl<'de, SL: FromStr<Err = E>, E: Display> serde::Deserialize<'de> for StringLike<SL> {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let s: String = serde::Deserialize::deserialize(deserializer)?;
-        FromStr::from_str(&s)
-            .map(StringLike)
-            .map_err(|e| serde::de::Error::custom(e))
-    }
-}
-impl<SL: Display> serde::Serialize for StringLike<SL> {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(&format!("{}", self.0))
-    }
-}
+use url::Host;
 
 #[derive(Clone, Debug)]
 pub struct BitcoinInfo {
     pub bitcoin_rpcuser: String,
     pub bitcoin_rpcpassword: String,
-    pub bitcoin_rpcconnect: Url,
-    pub bitcoin_rpcport: u16,
+    pub bitcoin_rpcconnect: Host<String>,
+    pub bitcoin_rpcport: Option<u16>,
 }
 impl<'de> serde::Deserialize<'de> for BitcoinInfo {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
@@ -39,7 +21,7 @@ impl<'de> serde::Deserialize<'de> for BitcoinInfo {
         pub struct BitcoinInfoSerDe {
             pub bitcoin_rpcuser: Option<String>,
             pub bitcoin_rpcpassword: Option<String>,
-            pub bitcoin_rpcconnect: Option<StringLike<Url>>,
+            pub bitcoin_rpcconnect: Option<String>,
             pub bitcoin_rpcport: Option<u16>,
         }
 
@@ -51,9 +33,11 @@ impl<'de> serde::Deserialize<'de> for BitcoinInfo {
                 .unwrap_or_else(|| "local321".to_owned()),
             bitcoin_rpcconnect: info
                 .bitcoin_rpcconnect
-                .map(|a| a.0)
-                .unwrap_or_else(|| Url::parse("127.0.0.1").unwrap()),
-            bitcoin_rpcport: info.bitcoin_rpcport.unwrap_or(8332),
+                .map(|a| Host::parse(&a))
+                .transpose()
+                .map_err(serde::de::Error::custom)?
+                .unwrap_or_else(|| Host::Ipv4([127, 0, 0, 1].into())),
+            bitcoin_rpcport: info.bitcoin_rpcport,
         })
     }
 }
@@ -68,7 +52,25 @@ pub struct PluginInfo {
 
 #[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "kebab-case")]
+pub enum Network {
+    Regtest,
+    Testnet,
+    Bitcoin,
+}
+impl Network {
+    pub fn default_port(&self) -> u16 {
+        match self {
+            &Network::Regtest => 18443,
+            &Network::Testnet => 18332,
+            &Network::Bitcoin => 8332,
+        }
+    }
+}
+
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct ConfigInfo {
+    pub network: Network,
     pub always_use_proxy: bool,
     pub rescan: u64,
     pub proxy: Option<SocketAddr>,
