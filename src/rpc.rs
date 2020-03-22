@@ -60,6 +60,10 @@ pub struct RpcReq {
     pub id: Option<JsonRpcV2Id>,
     #[serde(default)]
     pub jsonrpc: JsonRpcV2,
+    // a 🐄 is being used for a union type between
+    // an owned and borrowed string this is necessary
+    // to use a &'static str for serialization and an
+    // owned String for deserialization
     pub method: Cow<'static, str>,
     pub params: RpcParams,
 }
@@ -139,6 +143,10 @@ where
 #[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
 pub struct RpcError {
     pub code: serde_json::Number,
+    // a 🐄 is being used for a union type between
+    // an owned and borrowed string this is necessary
+    // to use a &'static str for serialization and an
+    // owned String for deserialization
     pub message: Cow<'static, str>,
     #[serde(
         default,

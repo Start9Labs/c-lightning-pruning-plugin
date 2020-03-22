@@ -21,12 +21,17 @@ fn is_onion(url: &reqwest::Url) -> bool {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    simple_logging::log_to_stderr(log::LevelFilter::Info);
+    simple_logging::log_to_stderr(log::LevelFilter::Info); // set up logging
+
+    // start rpc handler and wait for info needed from "init" method
     let (sender, reciever) = crossbeam_channel::bounded(1);
     let rpc_handler = std::thread::spawn(move || stdio::run_rpc_handler(sender));
     let init_info = init_info::InitInfoArc::new(reciever).wait_for_info().await;
 
+    // connect an RPC socket to be reused for rpc requests
     let mut socket = tokio::net::UnixStream::connect(&*init_info.socket_path).await?;
+
+    // fetch configuration params external to the plugin
     let config_info = rpc::make_socket_req(
         &mut socket,
         rpc::RpcReq {
@@ -49,8 +54,11 @@ async fn main() -> Result<(), Error> {
             .ok_or_else(|| failure::format_err!("bcli info not found"))?
             .options,
     )?;
+
+    // create an http request to bitcoind that can be cloned and reused
     let client = reqwest::Client::builder().user_agent(APP_USER_AGENT);
     let client = if let Some(proxy) = config_info.proxy {
+        // use provided socks5 proxy if necessary
         let proxy = reqwest::Url::parse(&format!("socks5h://{}", proxy))?;
         client.proxy(if config_info.always_use_proxy {
             reqwest::Proxy::all(proxy)?
@@ -80,6 +88,8 @@ async fn main() -> Result<(), Error> {
         bitcoin_info.bitcoin_rpcuser,
         Some(bitcoin_info.bitcoin_rpcpassword),
     );
+
+    // every `pruning-interval` seconds, run the `prune` method
     let mut interval =
         tokio::time::interval(std::time::Duration::from_secs(init_info.pruning_interval));
     while let Some(_) = interval.next().await {

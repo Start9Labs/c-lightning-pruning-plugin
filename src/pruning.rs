@@ -16,6 +16,7 @@ pub async fn prune(
     bitcoin_req: &reqwest::RequestBuilder,
     rescan: u64,
 ) -> Result<(), Error> {
+    // fetch scanned block height from c-lightning
     let res = make_socket_req(
         socket,
         RpcReq {
@@ -30,10 +31,11 @@ pub async fn prune(
     .res()?;
     let res: LightningInfo = serde_json::from_value(res)?;
     if res.blockheight < rescan + 1 {
-        return Ok(());
+        return Ok(()); // don't want to prune to negative height
     }
     let prune_height = res.blockheight - rescan - 1;
     log::info!("pruning bitcoin to {}", prune_height);
+    // run "pruneblockchain" against bitcoind
     let res = bitcoin_req
         .try_clone()
         .ok_or_else(|| failure::format_err!("cannot clone request"))?
