@@ -13,7 +13,7 @@ This plugin manages pruning of bitcoind such that it can always sync
 
 Install `cargo`
 ```
-https://github.com/Start9Labs/c-lightning-pruning-plugin
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 ### From Crates.io
