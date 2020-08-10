@@ -1,6 +1,6 @@
 [package]
 name = "c-lightning-pruning-plugin"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Aiden McClelland <me@drbonez.dev>"]
 edition = "2018"
 description = "A plugin for c-lightning that manages pruning of bitcoind such that it can always sync."
@@ -10,12 +10,12 @@ documentation = "https://docs.rs/c-lightning-pruning-plugin"
 readme = "README.md"
 
 [dependencies]
-crossbeam-channel = "0.4.2"
-failure = "0.1.7"
-log = "0.4.8"
-reqwest = { version = "0.10.4", features = ["json"] }
-serde = { version = "1.0.105", features = ["derive"] }
-serde_json = "1.0.48"
+crossbeam-channel = "0.4.3"
+failure = "0.1.8"
+log = "0.4.11"
+reqwest = { version = "0.10.7", features = ["json", "socks"] }
+serde = { version = "1.0.114", features = ["derive"] }
+serde_json = "1.0.57"
 simple-logging = "2.0"
-tokio = { version = "0.2.13", features = ["full"] }
+tokio = { version = "0.2.22", features = ["full"] }
 url = "2.1.1"
