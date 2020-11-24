@@ -20,6 +20,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ```
 cargo install c-lightning-pruning-plugin
+bitcoind -prune=1 
 lightningd --plugin=~/.cargo/bin/c-lightning-pruning-plugin
 ```
 
@@ -29,5 +30,6 @@ lightningd --plugin=~/.cargo/bin/c-lightning-pruning-plugin
 git clone https://github.com/Start9Labs/c-lightning-pruning-plugin.git
 cd c-lightning-pruning-plugin
 cargo build --release
+bitcoind -prune=1
 lightningd --plugin=/path/to/c-lightning-pruning-plugin/target/release/c-lightning-pruning-plugin
 ```
